@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Connect Sunhouse</title>
+  <style>
+    body { font-family: ui-sans-serif, system-ui, sans-serif; background: #F4EDE3; color: #2C241C; margin: 0; }
+    main { max-width: 28rem; margin: 3rem auto; padding: 1.5rem; background: #FFF9F2; border-radius: 16px; }
+    h1 { font-size: 1.35rem; margin: 0 0 .4rem; }
+    p { line-height: 1.45; color: #5A5148; }
+    label { display: block; font-weight: 600; margin: .9rem 0 .3rem; }
+    input[type=email], input[type=password] {
+      width: 100%; box-sizing: border-box; padding: .7rem .8rem;
+      border: 1px solid #D9CFC3; border-radius: 10px; font-size: 1rem;
+    }
+    button {
+      margin-top: 1.2rem; width: 100%; padding: .85rem; border: 0; border-radius: 10px;
+      background: #C4A35A; color: #2C241C; font-weight: 700; font-size: 1rem;
+    }
+    .err { color: #8A3B2A; background: #F8E4DC; padding: .7rem .8rem; border-radius: 10px; }
+  </style>
+</head>
+<body>
+<main>
+  <h1>Connect this AI to Sunhouse</h1>
+  <p>Sign in with the same email and password you use in the Sunhouse app. Stay in this window — do not open a new tab.</p>
+  <p id="err" class="err" hidden></p>
+  <form id="f" method="post" action="https://txhubawogbxtmhtvxxya.supabase.co/functions/v1/mcp-oauth">
+    <div id="hidden"></div>
+    <label for="email">Email</label>
+    <input id="email" name="email" type="email" autocomplete="username" required/>
+    <label for="password">Password</label>
+    <input id="password" name="password" type="password" autocomplete="current-password" required/>
+    <button type="submit">Allow access</button>
+  </form>
+</main>
+<script>
+(function () {
+  var q = new URLSearchParams(window.location.search);
+  var box = document.getElementById("hidden");
+  q.forEach(function (value, key) {
+    if (key === "email" || key === "password" || key === "error") return;
+    var input = document.createElement("input");
+    input.type = "hidden";
+    input.name = key;
+    input.value = value;
+    box.appendChild(input);
+  });
+  var err = q.get("error");
+  if (err) {
+    var el = document.getElementById("err");
+    el.textContent = err;
+    el.hidden = false;
+  }
+})();
+</script>
+</body>
+</html>
