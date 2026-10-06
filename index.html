@@ -1,3 +1,12 @@
+<!--
+WHAT: Login page the parent sees (MAJ-02). Names the host the access goes to, from the
+redirect_uri the form will post, before they type a password. The mcp-oauth function also
+passes sunhouse_host (computed from that redirect); if the two disagree, or there is no
+host, the form is hidden.
+ROLLBACK: restore this file. The live copy is published separately to GitHub Pages (ryanthechai/sunhouse-mcp-login).
+RISK: This repo file does not change the page parents see until that Pages site is updated by hand
+(copy this file to the site's index.html).
+-->
 <!doctype html>
 <html lang="en">
 <head>
@@ -19,12 +28,14 @@
       background: #C4A35A; color: #2C241C; font-weight: 700; font-size: 1rem;
     }
     .err { color: #8A3B2A; background: #F8E4DC; padding: .7rem .8rem; border-radius: 10px; }
+    .dest { color: #2C241C; font-weight: 700; }
   </style>
 </head>
 <body>
 <main>
   <h1>Connect this AI to Sunhouse</h1>
   <p>Sign in with the same email and password you use in the Sunhouse app. Stay in this window — do not open a new tab.</p>
+  <p id="dest" class="dest"></p>
   <p id="err" class="err" hidden></p>
   <form id="f" method="post" action="https://txhubawogbxtmhtvxxya.supabase.co/functions/v1/mcp-oauth">
     <div id="hidden"></div>
@@ -40,7 +51,7 @@
   var q = new URLSearchParams(window.location.search);
   var box = document.getElementById("hidden");
   q.forEach(function (value, key) {
-    if (key === "email" || key === "password" || key === "error") return;
+    if (key === "email" || key === "password" || key === "error" || key === "sunhouse_host") return;
     var input = document.createElement("input");
     input.type = "hidden";
     input.name = key;
@@ -52,6 +63,24 @@
     var el = document.getElementById("err");
     el.textContent = err;
     el.hidden = false;
+  }
+  var dest = document.getElementById("dest");
+  var redirect = q.get("redirect_uri") || "";
+  var clientName = (q.get("client_name") || "").trim();
+  var host = "";
+  try {
+    host = new URL(redirect).host;
+  } catch (e) {
+    host = "";
+  }
+  var named = q.get("sunhouse_host");
+  if (!host || (named !== null && named !== host)) {
+    dest.textContent = "Sunhouse could not tell where this access would be sent. Do not sign in.";
+    document.getElementById("f").hidden = true;
+  } else if (clientName) {
+    dest.textContent = "Sunhouse will send access to " + host + " for " + clientName + ".";
+  } else {
+    dest.textContent = "Sunhouse will send access to " + host + ".";
   }
 })();
 </script>
